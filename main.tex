@@ -55,7 +55,7 @@
     \end{block}
 \end{frame}
 
-
+%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \begin{frame}{Document classification}
     \begin{block}{}
@@ -94,49 +94,29 @@
    \end{columns}
 \end{frame} 
 
-\begin{frame}{Count vs. prediction}
-    \begin{block}{Prediction}
-        \begin{itemize}
-            \item extremely popular
-            \item huge performance gains
-            \item less memory demanding
-        \end{itemize}
+\begin{frame}{LSA}
+~
+    {\tiny \input{lsa.tex}}
+    \begin{block}
+        
+        $d_i$: bag of words
+        
+        $u_i$: word vector
+        
+        $M$: co-occurrence matrix
+        
+        $v_i$: document vector
+        
+        $d_i U$: lower dimensional embedding $\rightarrow$ train classifier
     \end{block}
+\end{frame}
 
-    \begin{block}{Count}
-        \begin{itemize}
-            \item less hyperparameters
-            \item easier to ``train''
-            \item teoreticaly based
-        \end{itemize}
-    \end{block}
-\end{frame} 
-
-\begin{frame}{Count vs prediction}
-    \begin{block}{Glove vectors as explicit factorization}
-        \begin{itemize}
-            \item Neural word embedding as implicit matrix factorization \cite{levy2014neural}
-        \end{itemize}
-    \end{block}
-
-    \begin{block}{Hyperparameters matter}
-        \begin{itemize}
-            \item Improving distributional similarity with lessons learned from word embeddings \cite{levy2015improving}
-        \end{itemize}
-    \end{block}
-
-    \begin{block}{Does not work well on small datasets}
-        \begin{itemize}
-            \item Comparative study of LSA vs Word2vec embeddings in small corpora \cite{altszyler2016comparative}
-        \end{itemize}
-    \end{block}
-\end{frame} 
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Problem outline}
 \begin{frame}{LSA problems}
     \begin{block}{}
         \begin{itemize}
+            \item Most representative features, not most discriminative
             \item Sensitive to preprocessing
             \item Sensitive to weights
             \item Unsupervised and can forget things
@@ -145,6 +125,10 @@
 \end{frame} 
 
 \begin{frame}{Current solutions}
+    $$ d_i \rightarrow_w \hat{d_i} $$
+    
+    Factorize $M$ train classifier on low dimensionality embeddings
+
     \begin{block}{}
         \begin{itemize}
             \item Preprocessing
@@ -154,18 +138,22 @@
     \end{block}
 \end{frame} 
 
+
 \section{Our work}
 \begin{frame}{Our system}
     \begin{block}{Baseline}
-        Co-occurrence matrix, rescale weight, factorization, prediction
-        
-        Training the predictor
+        \begin{itemize}
+            \item Apply weighting scheme $w$, factorize, predict 
+            \item Training the predictor
+        \end{itemize}
     \end{block}
 
     \begin{block}{Our}
-        Co-occurrence matrix, rescale weight, factorization, prediction
-
-        Compute gradient with respect to the weights
+        \begin{itemize}
+            
+            \item Apply weighting scheme $w$, rescale with $w'$, factorize, predict 
+            \item Training the predictor, optimize $w'$
+        \end{itemize}
     \end{block}
     
     LSA used in similar manner in \cite{ionescu2015training}
@@ -176,24 +164,23 @@
     \column{0.5\linewidth}
     \begin{itemize}
         \item Co-occurrence matrix $M$
-        \item Weight vector $t$
+        \item Weight vector $w'$
     \end{itemize}
     \column{0.5\linewidth}
     \begin{itemize}
         \item SVD: $U \Sigma V^T$
-        \item Simple classifier: $\sigma (x \theta + b)$
+        \item Simple classifier: $\sigma (v \theta + b)$
     \end{itemize}    
     \end{columns}
 
     \begin{block}{}
     \begin{itemize}
-        \item Reweighted matrix $M \circ t$
-        \item SVD decomposition $U \Sigma V^T$
-        \item Compute embedding $x = d \circ t U$
-        \item Train classifier $\hat{y} = \sigma (x \theta + b)$
-        \item Compute error $E = \frac{1}{2}(\hat{y}-y)^2$
-        \item Compute derivation $\frac{\partial E}{\partial t} = (\hat{y} -y) \sigma(\hat{y}) (1-\sigma(\hat{y}))\Theta U$
-        \item Update weights: $t = t - \alpha \frac{\partial E}{\partial t}$
+        \item Reweighted matrix $M \circ w'$
+        \item SVD decomposition $M \circ w' = U \Sigma V^T$
+        \item Compute embedding $v = d \circ w' U$
+        \item Train classifier $\hat{y} = \sigma (v \theta + b)$ to minimize $E = \frac{1}{2}(\hat{y}-y)^2$
+        \item Compute derivation $\frac{\partial E}{\partial w'} = (\hat{y} -y) \sigma(\hat{y}) (1-\sigma(\hat{y}))\Theta U$
+        \item Update weights: $w' = w' - \alpha \frac{\partial E}{\partial t}$
     \end{itemize}    
     \end{block}
 \end{frame} 
@@ -212,7 +199,8 @@
 \end{frame} 
 
 \section{Results}
-\begin{frame}{}
+
+\begin{frame}{Baseline on customer review dataset}
     \begin{columns}
         \column{0.5\linewidth}
                    \begin{figure}[H]
@@ -233,7 +221,7 @@
                 
 \end{frame} 
 
-\begin{frame}{}
+\begin{frame}{Our method on customer review dataset}
     \begin{columns}
         \column{0.5\linewidth}
                    \begin{figure}[H]
@@ -253,7 +241,7 @@
     \end{columns}                
 \end{frame} 
 
-\begin{frame}{}
+\begin{frame}{Our method on movie review dataset}
     \begin{columns}
         \column{0.5\linewidth}
                    \begin{figure}[H]
@@ -273,7 +261,7 @@
     \end{columns}                
 \end{frame} 
 
-\begin{frame}{}
+\begin{frame}{Our method on opinion polarity review dataset}
     \begin{columns}
         \column{0.5\linewidth}
             \begin{figure}[H]
@@ -293,7 +281,7 @@
     \end{columns}                
 \end{frame} 
 
-\begin{frame}{}
+\begin{frame}{Our method on subjective/objective dataset}
     \begin{columns}
         \column{0.5\linewidth}
                    \begin{figure}[H]
@@ -318,12 +306,9 @@
 \begin{frame}{Plans}
     \begin{block}{}
         \begin{itemize}   
-            \item Proper exploration of results
-            \item Extend to bigrams
-            \item Try transfer learning
-            \item Try to extract the formula
-            \item Try more complicated classifiers
-            \item Try stochastic gradient \cite{brand2006fast}
+            \item Try other weight schemes
+            \item Compare to word2vec
+            \item More datasets 
         \end{itemize}
     \end{block}
 \end{frame} 
@@ -348,5 +333,44 @@
                 \bibliographystyle{apalike}
                 \bibliography{prezentacia.bib} 
             \end{frame}
+
+\begin{frame}{Count vs. prediction}
+    \begin{block}{Prediction}
+        \begin{itemize}
+            \item extremely popular
+            \item huge performance gains
+            \item less memory demanding
+        \end{itemize}
+    \end{block}
+
+    \begin{block}{Count}
+        \begin{itemize}
+            \item less hyperparameters
+            \item easier to ``train''
+            \item teoreticaly based
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Count vs prediction}
+    \begin{block}{Glove vectors as explicit factorization}
+        \begin{itemize}
+            \item Neural word embedding as implicit matrix factorization \cite{levy2014neural}
+        \end{itemize}
+    \end{block}
+
+    \begin{block}{Hyperparameters matter}
+        \begin{itemize}
+            \item Improving distributional similarity with lessons learned from word embeddings \cite{levy2015improving}
+        \end{itemize}
+    \end{block}
+
+    \begin{block}{Does not work well on small datasets}
+        \begin{itemize}
+            \item Comparative study of LSA vs Word2vec embeddings in small corpora \cite{altszyler2016comparative}
+        \end{itemize}
+    \end{block}
+\end{frame} 
+
 
 \end{document}\grid
