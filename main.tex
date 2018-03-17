@@ -37,6 +37,8 @@
 \author{Bc. Vladimír Macko}
 \institute{RNDr. Kristína Malinovská, PhD.}
 
+
+
 \begin{document}
         
 \begin{frame}
@@ -46,7 +48,7 @@
 \begin{frame}{Overview}
     \begin{block}{}
         \begin{itemize}
-            \item Introduction to the problematics
+            \item Introduction to the problem
             \item Problem outline
             \item Our work
             \item Results
@@ -67,6 +69,7 @@
             \item create representation for words
             \item create representation for document
             \item predict
+            \item small, specific datasets
         \end{itemize}
     \end{block}
 \end{frame} 
@@ -75,12 +78,15 @@
     \begin{columns}
        \column{0.5\linewidth}
         Local representation
+        
+        $[0,0,1,0,0]$
         \begin{block}{}
             One hot encoding
         \end{block}
 
         \column{0.5\linewidth}
         Distributed representation
+        $[0.1,0.2,0.6,0.05,0.05]$
         \begin{block}{Count based}
             Factorization of co-occurrence matrix
             
@@ -148,7 +154,7 @@
         \end{itemize}
     \end{block}
 
-    \begin{block}{Our}
+    \begin{block}{Our approach}
         \begin{itemize}
             
             \item Apply weighting scheme $w$, rescale with $w'$, factorize, predict 
@@ -179,8 +185,8 @@
         \item SVD decomposition $M \circ w' = U \Sigma V^T$
         \item Compute embedding $v = d \circ w' U$
         \item Train classifier $\hat{y} = \sigma (v \theta + b)$ to minimize $E = \frac{1}{2}(\hat{y}-y)^2$
-        \item Compute derivation $\frac{\partial E}{\partial w'} = (\hat{y} -y) \sigma(\hat{y}) (1-\sigma(\hat{y}))\Theta U$
-        \item Update weights: $w' = w' - \alpha \frac{\partial E}{\partial t}$
+        \item Compute derivative $\frac{\partial E}{\partial w'} = (\hat{y} -y) \sigma(\hat{y}) (1-\sigma(\hat{y}))\Theta U$
+        \item Update weights: $w' = w' - \alpha \frac{\partial E}{\partial w'}$
     \end{itemize}    
     \end{block}
 \end{frame} 
@@ -188,7 +194,7 @@
 \begin{frame}{Evaluation}
     \begin{block}{Datasets from SentEval \cite{conneau2017supervised}}
         \begin{itemize}
-            \item Custumer review dataset
+            \item Customer review dataset
             \item Movie review
             \item Subjective vs objective
             \item Opinion polarity            
@@ -220,6 +226,65 @@
     \end{columns}
                 
 \end{frame} 
+
+\begin{frame}[fragile]{Insight}
+    \begin{columns}
+        \column{0.25\linewidth}
+        	$w'$ 
+\begin{verbatim}
+1.55: 't
+1.38: slow
+1.37: plus
+1.34: good
+1.34: flaw
+1.33: bit
+1.33: perfect
+1.31: excellent
+1.29: the
+1.27: to
+\end{verbatim}
+        \column{0.25\linewidth}
+\begin{verbatim}
+0.20: i
+0.56: diaper
+0.56: camera
+0.57: and
+0.60: 3
+0.61: am
+0.63: small
+0.64: !
+0.69: very
+0.71: does
+\end{verbatim}
+        \column{0.25\linewidth}
+        $w'$ for TFIDF
+\begin{verbatim}
+1.72: not
+1.67: only
+1.49: great
+1.41: 't
+1.37: easy
+1.28: good
+1.26: after
+1.23: but
+1.23: excellent
+1.19: bit
+\end{verbatim}
+        \column{0.25\linewidth}
+\begin{verbatim}
+0.91: ,
+0.92: is
+0.93: for
+0.95: this
+0.95: it
+0.96: has
+0.97: very
+0.97: screen
+0.98: say
+0.98: antivirus
+\end{verbatim}
+    \end{columns}
+\end{frame}
 
 \begin{frame}{Our method on customer review dataset}
     \begin{columns}
