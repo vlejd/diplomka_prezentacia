@@ -227,6 +227,26 @@
                 
 \end{frame} 
 
+\begin{frame}{Our method on customer review dataset}
+    \begin{columns}
+        \column{0.5\linewidth}
+                   \begin{figure}[H]
+                    \centering
+                    \caption*{SVD + LR + gradient}
+                    \includegraphics[height=0.4\textheight]{images/CRDataset_grad.png}
+                    \caption{Precision of weight improving on CR dataset for multiple epochs}
+                \end{figure}
+            \column{0.5\linewidth}
+
+                \begin{figure}[H]
+                    \centering
+                    \caption*{TFIDF + SVD + LR + gradient}
+                    \includegraphics[height=0.4\textheight]{images/CRDataset_tfidf_grad.png}
+                    \caption{Precision of tfidf weight improving on CR dataset for multiple epochs}
+                \end{figure}
+    \end{columns}                
+\end{frame} 
+
 \begin{frame}[fragile]{Insight}
     \begin{columns}
         \column{0.25\linewidth}
@@ -285,26 +305,6 @@
 \end{verbatim}
     \end{columns}
 \end{frame}
-
-\begin{frame}{Our method on customer review dataset}
-    \begin{columns}
-        \column{0.5\linewidth}
-                   \begin{figure}[H]
-                    \centering
-                    \caption*{SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/CRDataset_grad.png}
-                    \caption{Precision of weight improving on CR dataset for multiple epochs}
-                \end{figure}
-            \column{0.5\linewidth}
-
-                \begin{figure}[H]
-                    \centering
-                    \caption*{TFIDF + SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/CRDataset_tfidf_grad.png}
-                    \caption{Precision of tfidf weight improving on CR dataset for multiple epochs}
-                \end{figure}
-    \end{columns}                
-\end{frame} 
 
 \begin{frame}{Our method on movie review dataset}
     \begin{columns}
