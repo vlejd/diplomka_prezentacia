@@ -7,6 +7,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{animate}
+\usepackage{enumerate}
 \usepackage{subcaption}
 \usepackage{multicol}
 \usepackage[full, italic, slant]{complexity}
@@ -33,7 +34,7 @@
 \definecolor{bloodred}{RGB}{200,0,0}
 
 
-\title{Flowing gradient through SVD}
+\title{Improving LSA word weights for document classification}
 \author{Bc. Vladimír Macko}
 \institute{RNDr. Kristína Malinovská, PhD.}
 
@@ -48,11 +49,10 @@
 \begin{frame}{Overview}
     \begin{block}{}
         \begin{itemize}
-            \item Introduction to the problem
+            \item Introduction
             \item Problem outline
             \item Our work
             \item Results
-            \item Plans
         \end{itemize}
     \end{block}
 \end{frame}
@@ -185,7 +185,7 @@
         \item SVD decomposition $M \circ w' = U \Sigma V^T$
         \item Compute embedding $v = d \circ w' U$
         \item Train classifier $\hat{y} = \sigma (v \theta + b)$ to minimize $E = \frac{1}{2}(\hat{y}-y)^2$
-        \item Compute derivative $\frac{\partial E}{\partial w'} = (\hat{y} -y) \sigma(\hat{y}) (1-\sigma(\hat{y}))\Theta U$
+        \item Compute derivative $\frac{\partial E}{\partial w'} = (\hat{y} -y) \hat{y} (1-\hat{y})\Theta U$
         \item Update weights: $w' = w' - \alpha \frac{\partial E}{\partial w'}$
     \end{itemize}    
     \end{block}
@@ -389,15 +389,125 @@
     \vfill
 \end{frame}
 
-\appendix
 
-        \subsection{Literature}                
-            \begin{frame}[allowframebreaks]{Literature}
-            \footnotesize
-                \nocite{*}
-                \bibliographystyle{apalike}
-                \bibliography{prezentacia.bib} 
-            \end{frame}
+%\item "SVD dekompozíciu považoval pri počítaní grandientu za konštantu a nie funkciu vektora váh" "iba okrajovo túto možnosť spomína"
+% SRSLY!!?!? cela kapitola v related work, a udavame presne dvovody preco
+
+
+\begin{frame}{Opponent's review}
+    \begin{block}{Notation}
+        \begin{itemize}   
+            \item "označenia bez akéhokoľvek vysvetlenia":
+            \item "matica M" % pre čitateľa má byť podstatné len to, že to je matica dokumentov. Používame maticu MT, lebo je to z nejakheho dvovodu standard pre robenie SVD dekompozicie.
+            \item "documents vs sentences": "We consider the sentences to be basically identical to documents as they both
+can be considered to be sequences of words."            
+             
+        \end{itemize}
+    \end{block}
+\end{frame} 
+
+\begin{frame}{Opponent's review}
+    \begin{block}{Bibliography}
+        \begin{itemize}   
+            \item 62 citations on 6 pages
+            \item researched other thesis (Vajdová, 2017)
+            \item stochastic gradient descent: [19] \cite{Goodfellow-et-al-2016},  [8] \cite{bottou-bousquet-2008},
+            [55] \cite{rumelhart1986david},  % powered by maria vajdova
+            \item TF-IDF: [56], \cite{salton1988term}
+        \end{itemize}
+    \end{block}
+\end{frame} 
+
+\begin{frame}{Opponent's review}
+    \begin{block}{Weighting schemes}
+        \begin{itemize}   
+            \item Weighting  schemes [61] [29] [18]
+        \end{itemize}
+    \end{block}
+    
+    \begin{align*}
+        ig = &\frac{a}{N}\log_2{\frac{aN}{(a+b)(a+c)}} + \frac{b}{N}\log_2{\frac{bN}{(a+b)(b+d)}} + \\ &\frac{c}{N}\log_2{\frac{cN}{(a+c)(c+d)}} + \frac{d}{N}\log_2{\frac{dN}{(b+d)(c+d)}} \\
+    \end{align*}
+    $$gr=\frac{ig}{-\frac{a+b}{N}\log_2{\frac{a+b}{N}} - \frac{c+d}{N}\log_2{\frac{c+d}{N}}}$$
+    
+    
+\end{frame} 
+
+\begin{frame}{Opponent's review}
+    \begin{block}{Default model parameters}
+        \begin{itemize}   
+            \item mentioned the relevant ones
+            \item others: \textbf{penalty}, dual, tol, C, fit\_intercept, intercept\_scaling, class\_weight, random\_state, solver, max\_iter, multi\_class, warm\_start, \textbf{kernel}, degree, gamma, coef0, shrinking, probability, cache\_size, decision\_function\_shape, alpha, window, min\_count, sample, seed, workers, min\_alpha, sg, hs, negative, cbow\_mean, hashfxn, iter, null\_word, trim\_rule, sorted\_vocab, batch\_words, compute\_loss, callbacks, num\_topics, id2word, chunksize, decay, distributed, onepass, power\_iters, extra\_samples
+        \end{itemize}
+    \end{block}
+\end{frame} 
+
+\begin{frame}{Opponent's review}
+    \begin{block}{Others}
+        \begin{itemize}   
+            \item ``Ako sa spoja TF a IDF váhy do jednej'': product
+            \item Classifier in 4.2.3: logistic regression % we used SVM as well, but results were poor, multiple classifiers should be changed to logistic regression
+        \end{itemize}
+    \end{block}
+\end{frame} 
+
+\begin{frame}{Opponent's questions}
+    \small
+    \begin{block}{Constrains on $w'$}
+        \begin{itemize}
+            \itemsep0em
+            \item We tried regularization, but results were poor
+            \item Other constrains are extremely hard (GANS)
+            \item In practice, results were fine
+        \end{itemize}
+    \end{block}
+    
+    \begin{block}{$w'$ vs $2w'$}
+        \begin{itemize}
+            \itemsep0em
+            \item In theory, no difference % SVD should be the same, it should be absorbed in the classifiers weights.
+            \item In practice the classifier may be regularized
+            \item Experimentally, weights are centered around 1 (4.4.1.2)
+        \end{itemize}
+    \end{block}
+    
+    \begin{block}{Underweighting vs overweighting}
+        \begin{itemize}
+            \itemsep0em
+            \item Relative change in ordering % what we did
+            \item Notions of importance % Ze momentalne existuje niekolko sposobov, ako zistovat dvolezitost vstupu pre klasifikator, to by sa dalo aj tu.
+            %\item Kombinácia týchto čísel by len bola arbitrary číslo 4.21 a 4.22
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Supervisor's review}
+    \begin{block}{Datasets \*}
+        \begin{itemize}
+            %\item V práci používate 5 rôznych dátových množín, z ktorých každá predstavuje trochu iný problém. Ich porovnanie uvádzate v číslach v tabuľke 4.1, viete ich všask navzájom porovnať a vysvetliť v čom sa líšia a akým spôsobom sa tieto odlišnosti prejavia pri použití rôznych prístupov pre tvorbu slovných vektorov a váh?
+            \item \*
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\begin{frame}{Supervisor's review}
+    \begin{block}{Time complexity}
+        \begin{itemize}
+            \item LSA: $1-3$, complexity depends on SVD
+            \item eLSA: $LSA \times epochs$, (35)
+            \item word2vec: $5$, $C \times (D + D \times \log_2(V))$
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+\appendix
+\subsection{Literature}                
+\begin{frame}[allowframebreaks]{Literature}
+\footnotesize
+    \nocite{*}
+    \bibliographystyle{apalike}
+    \bibliography{prezentacia.bib} 
+\end{frame}
 
 \begin{frame}{Count vs. prediction}
     \begin{block}{Prediction}
