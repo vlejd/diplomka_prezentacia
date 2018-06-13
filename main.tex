@@ -13,6 +13,22 @@
 \usepackage[full, italic, slant]{complexity}
 \usepackage{appendixnumberbeamer}
 
+\usepackage[T1]{fontenc}
+\usepackage{color}
+\usepackage{stmaryrd}
+\usepackage{amsmath} 
+\usepackage{amsthm}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{algorithm2e}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{indentfirst}
+
+
+
 
 \expandafter\def\expandafter\insertshorttitle\expandafter{%
   \insertshorttitle\hfill\insertframenumber\,/\,\inserttotalframenumber}
@@ -34,10 +50,17 @@
 \definecolor{bloodred}{RGB}{200,0,0}
 
 
-\title{Improving LSA word weights for document classification}
-\author{Bc. Vladimír Macko}
-\institute{RNDr. Kristína Malinovská, PhD.}
+\title[eLSA]{Improving LSA word weights for document classification}
 
+\author[Macko, Malinovska] % (optional, for multiple authors)
+{Bc. Vladimír Macko\inst{1} \and supervisor: RNDr. Kristína Malinovská, PhD.\inst{1}}
+ 
+\institute[VFU] % (optional)
+{
+  \inst{1}%
+  Comenius University\\
+  Faculty of Mathematics, Physics and Informatics
+}
 
 
 \begin{document}
@@ -60,8 +83,8 @@
 %%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 \begin{frame}{Document classification}
-    \begin{block}{}
-        \emph{This was a terrible movie}
+    \begin{block}{Sentiment analysis}
+        \emph{This was a terrible movie} $=$ negative sentiment
     \end{block}
     
     \begin{block}{}   
@@ -69,43 +92,17 @@
             \item create representation for words
             \item create representation for document
             \item predict
-            \item small, specific datasets
+            %\item small, specific datasets
         \end{itemize}
     \end{block}
 \end{frame} 
 
-\begin{frame}{Word vectors}
-    \begin{columns}
-       \column{0.5\linewidth}
-        Local representation
-        
-        $[0,0,1,0,0]$
-        \begin{block}{}
-            One hot encoding
-        \end{block}
-
-        \column{0.5\linewidth}
-        Distributed representation
-        $[0.1,0.2,0.6,0.05,0.05]$
-        \begin{block}{Count based}
-            Factorization of co-occurrence matrix
-            
-            LSA (SVD)
-        \end{block}
-        \begin{block}{Prediction based}
-            Trained neural network
-
-            Skip gram    
-        \end{block}    
-   \end{columns}
-\end{frame} 
-
-\begin{frame}{LSA}
+\begin{frame}{SVD}
 ~
     {\tiny \input{lsa.tex}}
     \begin{block}
         
-        $d_i$: bag of words
+        $d_i$: document as bag of words
         
         $u_i$: word vector
         
@@ -113,9 +110,22 @@
         
         $v_i$: document vector
         
-        $d_i U$: lower dimensional embedding $\rightarrow$ train classifier
+        $d_i U$: lower dimensional embedding
     \end{block}
 \end{frame}
+
+\begin{frame}{LSA}
+    \includegraphics[width=0.9\textwidth]{LSA.pdf}
+    \begin{block}
+        
+        $W$: reweighting
+
+        $S$: decomposition
+        
+        $C$: classifier
+    \end{block}
+\end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Problem outline}
@@ -123,7 +133,7 @@
     \begin{block}{}
         \begin{itemize}
             \item Most representative features, not most discriminative
-            \item Sensitive to preprocessing
+            \item Sensitive to preprocessing and stop words
             \item Sensitive to weights
             \item Unsupervised and can forget things
         \end{itemize}
@@ -131,10 +141,6 @@
 \end{frame} 
 
 \begin{frame}{Current solutions}
-    $$ d_i \rightarrow_w \hat{d_i} $$
-    
-    Factorize $M$ train classifier on low dimensionality embeddings
-
     \begin{block}{}
         \begin{itemize}
             \item Preprocessing
@@ -144,19 +150,24 @@
     \end{block}
 \end{frame} 
 
+\begin{frame}{Current solutions}
+    \includegraphics[width=0.9\textwidth]{LSA+supervision.pdf}
+    \begin{block}
+        
+        $W$: reweighting
+
+        $S$: decomposition
+        
+        $C$: classifier
+    \end{block}
+\end{frame}
 
 \section{Our work}
-\begin{frame}{Our system}
-    \begin{block}{Baseline}
-        \begin{itemize}
-            \item Apply weighting scheme $w$, factorize, predict 
-            \item Training the predictor
-        \end{itemize}
-    \end{block}
+\begin{frame}{eLSA}
+    \includegraphics[width=0.9\textwidth]{eLSA.pdf}
 
-    \begin{block}{Our approach}
+    \begin{block}{eLSA}
         \begin{itemize}
-            
             \item Apply weighting scheme $w$, rescale with $w'$, factorize, predict 
             \item Training the predictor, optimize $w'$
         \end{itemize}
@@ -165,8 +176,9 @@
     LSA used in similar manner in \cite{ionescu2015training}
 \end{frame} 
 
+
 \begin{frame}{Gradient descent}
-    \begin{columns}    
+    \begin{columns}
     \column{0.5\linewidth}
     \begin{itemize}
         \item Co-occurrence matrix $M$
@@ -176,7 +188,7 @@
     \begin{itemize}
         \item SVD: $U \Sigma V^T$
         \item Simple classifier: $\sigma (v \theta + b)$
-    \end{itemize}    
+    \end{itemize}
     \end{columns}
 
     \begin{block}{}
@@ -191,193 +203,211 @@
     \end{block}
 \end{frame} 
 
+\section{Results}
 \begin{frame}{Evaluation}
     \begin{block}{Datasets from SentEval \cite{conneau2017supervised}}
         \begin{itemize}
-            \item Customer review dataset
-            \item Movie review
-            \item Subjective vs objective
-            \item Opinion polarity            
+            \item Customer review dataset (CR)
+            \item Movie review (MR)
+            \item Subjective vs objective (SUBJ)
+            \item Opinion polarity (MPQA)
+            \item Questions types (TREC), actually $6$ dataset
         \end{itemize}
     \end{block}
     
-    
 \end{frame} 
 
-\section{Results}
 
-\begin{frame}{Baseline on customer review dataset}
-    \begin{columns}
-        \column{0.5\linewidth}
-                   \begin{figure}[H]
-                    \centering
-                    \caption*{SVD + logistic regression}
-                    \includegraphics[height=0.4\textheight]{images/CRDataset.png}
-                    \caption{Precision of baseline on CR dataset for multiple tries}
-                \end{figure}
-            \column{0.5\linewidth}
-
-                \begin{figure}[H]
-                    \centering
-                    \caption*{TFIDF + SVD + logistic regression}
-                    \includegraphics[height=0.4\textheight]{images/CRDataset_tfidf.png}
-                    \caption{Precision of baseline on CR dataset for multiple tries}
-                \end{figure}
-    \end{columns}
-                
+\begin{frame}{eLSA learning curves}
+    \begin{figure}
+    \centerline{\includegraphics[width=0.8\textwidth]{learning_curve_MR_tfidf}}
+    \caption[Learning curve for eLSA with tfidf weights on MR dataset]{Learning curve for eLSA with tfidf weights on MR dataset}
+    \label{img:learning:curve}
+    \end{figure}
 \end{frame} 
 
-\begin{frame}{Our method on customer review dataset}
-    \begin{columns}
-        \column{0.5\linewidth}
-                   \begin{figure}[H]
-                    \centering
-                    \caption*{SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/CRDataset_grad.png}
-                    \caption{Precision of weight improving on CR dataset for multiple epochs}
-                \end{figure}
-            \column{0.5\linewidth}
+\begin{frame}{eLSA results}
+    \smalll
+\begin{table}[H]
+\begin{center}
 
-                \begin{figure}[H]
-                    \centering
-                    \caption*{TFIDF + SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/CRDataset_tfidf_grad.png}
-                    \caption{Precision of tfidf weight improving on CR dataset for multiple epochs}
-                \end{figure}
-    \end{columns}                
-\end{frame} 
+\begin{tabular}{ll|rrrr}
+\toprule
+   &   &   CR &  MPQA &   MR &  SUBJ \\
+scheme & lsa &        &        &        &        \\
+\midrule
+None & 200 & \textbf{0.01} & \textbf{0.02} & \textbf{0.06} & \textbf{0.02} \\
+   & 300 & \textbf{0.02} & \textbf{0.02} & \textbf{0.05} &     -0.0 \\
+   & 400 & \textbf{0.03} & \textbf{0.01} & \textbf{0.04} & \textbf{0.01} \\
+tfchi2 & 200 & \textbf{0.01} &      0.0 & \textbf{0.01} & \textbf{0.01} \\
+   & 300 &      0.0 &     -0.0 & \textbf{0.02} & \textbf{0.01} \\
+   & 400 & \textbf{0.01} &      0.0 & \textbf{0.03} & \textbf{0.02} \\
+tfgr & 200 & \textbf{0.01} &     -0.0 & \textbf{0.01} & \textbf{0.02} \\
+   & 300 & \textbf{0.01} &     -0.0 & \textbf{0.01} & \textbf{0.01} \\
+   & 400 & \textbf{0.03} & \textbf{0.01} & \textbf{0.01} & \textbf{0.02} \\
+\bottomrule
+\end{tabular}
 
-\begin{frame}[fragile]{Insight}
-    \begin{columns}
-        \column{0.25\linewidth}
-        	$w'$ 
-\begin{verbatim}
-1.55: 't
-1.38: slow
-1.37: plus
-1.34: good
-1.34: flaw
-1.33: bit
-1.33: perfect
-1.31: excellent
-1.29: the
-1.27: to
-\end{verbatim}
-        \column{0.25\linewidth}
-\begin{verbatim}
-0.20: i
-0.56: diaper
-0.56: camera
-0.57: and
-0.60: 3
-0.61: am
-0.63: small
-0.64: !
-0.69: very
-0.71: does
-\end{verbatim}
-        \column{0.25\linewidth}
-        $w'$ for TFIDF
-\begin{verbatim}
-1.72: not
-1.67: only
-1.49: great
-1.41: 't
-1.37: easy
-1.28: good
-1.26: after
-1.23: but
-1.23: excellent
-1.19: bit
-\end{verbatim}
-        \column{0.25\linewidth}
-\begin{verbatim}
-0.91: ,
-0.92: is
-0.93: for
-0.95: this
-0.95: it
-0.96: has
-0.97: very
-0.97: screen
-0.98: say
-0.98: antivirus
-\end{verbatim}
-    \end{columns}
+\caption[Accuracy increase over LSA]{Accuracy increase over LSA}
+\label{tab:batch:results}
+\end{center}
+\end{table}
 \end{frame}
 
-\begin{frame}{Our method on movie review dataset}
-    \begin{columns}
-        \column{0.5\linewidth}
-                   \begin{figure}[H]
-                    \centering
-                    \caption*{SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/MRDataset_grad.png}
-                    \caption{Precision of weight improving on MR dataset for multiple epochs}
-                \end{figure}
-            \column{0.5\linewidth}
+\begin{frame}{eLSA results}
+    \smalll
+\begin{table}[H]
+\begin{center}
 
-                \begin{figure}[H]
-                    \centering
-                    \caption*{TFIDF + SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/MRDataset_tfidf_grad.png}
-                    \caption{Precision of tfidf weight improving on MR dataset for multiple epochs}
-                \end{figure}
-    \end{columns}                
+\begin{tabular}{ll|rrrr}
+\toprule
+   &   &   CR &  MPQA &   MR &  SUBJ \\
+scheme & lsa &        &        &        &        \\
+\midrule
+tfidf & 200 & \textbf{0.04} & \textbf{0.06} & \textbf{0.07} & \textbf{0.01} \\
+   & 300 &     -0.0 & \textbf{0.05} & \textbf{0.05} &      0.0 \\
+   & 400 &     -0.01 & \textbf{0.03} & \textbf{0.02} & \textbf{0.01} \\
+tfig & 200 &      0.0 & \textbf{0.01} & \textbf{0.01} &     -0.0 \\
+   & 300 &      0.0 & \textbf{0.01} & \textbf{0.01} & \textbf{0.01} \\
+   & 400 & \textbf{0.03} &      0.0 & \textbf{0.02} & \textbf{0.01} \\
+tfor & 200 & \textbf{0.01} &      0.0 &      0.0 & \textbf{0.01} \\
+   & 300 &      0.0 &      0.0 &     -0.0 &      0.0 \\
+   & 400 &     -0.0 & \textbf{0.02} &     -0.03 & \textbf{0.01} \\
+\bottomrule
+\end{tabular}
+
+\caption[Accuracy increase over LSA]{Accuracy increase over LSA}
+\label{tab:batch:results}
+\end{center}
+\end{table}
+\end{frame}
+
+
+\begin{frame}[fragile]{Insight}
+\small
+\begin{table}[h]
+    \centering
+    \begin{minipage}{.4\linewidth}
+      \centering
+        \begin{tabular}{lr}
+\toprule
+words &  $w'$ \\
+\midrule
+   is &  6.25 \\
+  how &  5.87 \\
+ what &  3.73 \\
+   in &  3.60 \\
+ mean &  3.51 \\
+   of &  3.10 \\
+ come &  3.09 \\
+ long &  2.96 \\
+  for &  2.94 \\
+  the &  2.39 \\
+\bottomrule
+\end{tabular}
+
+      \subcaption{Words with highest $w'$}
+    \end{minipage}
+    \begin{minipage}{.4\linewidth}
+      \centering
+        \begin{tabular}{lr}
+\toprule
+        words &  $w'$ \\
+\midrule
+         from &  0.42 \\
+          its &  0.41 \\
+     nickname &  0.38 \\
+      address &  0.34 \\
+ abbreviation &  0.32 \\
+         fast &  0.32 \\
+         term &  0.25 \\
+         word &  0.24 \\
+      between &  0.04 \\
+            ? &  0.00 \\
+\bottomrule
+\end{tabular}
+
+      \subcaption{Words with lowest $w'$}
+    \end{minipage} 
+    \caption{Most reweighted words on DESC dataset for scheme TFIDF}
+    \label{tab:words:trec:tfidf}
+\end{table}
+\end{frame}
+
+
+
+\begin{frame}[fragile]{Insight}
+\small
+\begin{table}[H]
+    \centering
+    \begin{minipage}{.4\linewidth}
+      \centering
+        \begin{tabular}{lr}
+\toprule
+      words &  $w'$ \\
+\midrule
+         is &  7.69 \\
+        are &  4.52 \\
+       what &  3.52 \\
+       mean &  3.44 \\
+     origin &  3.42 \\
+ difference &  3.20 \\
+       much &  2.91 \\
+       long &  2.79 \\
+      where &  2.72 \\
+ definition &  2.71 \\
+\bottomrule
+\end{tabular}
+
+      \subcaption{Words with highest $w'$}
+    \end{minipage}
+    \begin{minipage}{.4\linewidth}
+      \centering
+        \begin{tabular}{lr}
+\toprule
+words &  $w'$ \\
+\midrule
+  out &  1.00 \\
+ name &  0.98 \\
+  you &  0.97 \\
+ does &  0.93 \\
+   in &  0.90 \\
+  who &  0.83 \\
+   do &  0.71 \\
+    ? &  0.59 \\
+  was &  0.46 \\
+  the &  0.00 \\
+\bottomrule
+\end{tabular}
+
+      \subcaption{Words with lowest $w'$}
+    \end{minipage} 
+    \caption{Most reweighted words on DESC dataset for scheme TFIG}
+    \label{tab:words:TREC:tfig}
+\end{table}
+\end{frame}
+
+
+
+
+
+\begin{frame}{Other experiments}
+    \begin{itemize}
+        \item word vectors baselines
+        \item learning rates for $w'$
+        \item batch gradient descent
+        \item stochastic gradient descent
+        \item even more datasets
+    \end{itemize}
 \end{frame} 
 
-\begin{frame}{Our method on opinion polarity review dataset}
-    \begin{columns}
-        \column{0.5\linewidth}
-            \begin{figure}[H]
-                \centering
-                \caption*{SVD + LR + gradient}
-                \includegraphics[height=0.4\textheight]{images/MPQADataset_grad.png}
-                \caption{Precision of weight improving on MPQA dataset for multiple epochs}
-            \end{figure}
-        \column{0.5\linewidth}
-
-            \begin{figure}[H]
-                \centering
-                \caption*{TFIDF + SVD + LR + gradient}
-                \includegraphics[height=0.4\textheight]{images/MPQADataset_tfidf_grad.png}
-                \caption{Precision of tfidf weight improving on MPQA dataset for multiple epochs}
-            \end{figure}
-    \end{columns}                
-\end{frame} 
-
-\begin{frame}{Our method on subjective/objective dataset}
-    \begin{columns}
-        \column{0.5\linewidth}
-                   \begin{figure}[H]
-                    \centering
-                    \caption*{SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/SUBJDataset_grad.png}
-                    \caption{Precision of weight improving on SUBJ dataset for multiple epochs}
-                \end{figure}
-            \column{0.5\linewidth}
-
-                \begin{figure}[H]
-                    \centering
-                    \caption*{TFIDF + SVD + LR + gradient}
-                    \includegraphics[height=0.4\textheight]{images/SUBJDataset_tfidf_grad.png}
-                    \caption{Precision of tfidf weight improving on SUBJ dataset for multiple epochs}
-                \end{figure}
-    \end{columns}                
-\end{frame} 
-
-
-
-\begin{frame}{Plans}
-    \begin{block}{}
-        \begin{itemize}   
-            \item Try other weight schemes
-            \item Compare to word2vec
-            \item More datasets 
-        \end{itemize}
-    \end{block}
-\end{frame} 
-
+\subsection{Literature}                
+\begin{frame}[allowframebreaks]{Literature}
+\footnotesize
+    \nocite{*}
+    \bibliographystyle{apalike}
+    \bibliography{prezentacia.bib} 
+\end{frame}
 
 \begin{frame}
     \vfill
@@ -389,6 +419,7 @@
     \vfill
 \end{frame}
 
+\appendix
 
 %\item "SVD dekompozíciu považoval pri počítaní grandientu za konštantu a nie funkciu vektora váh" "iba okrajovo túto možnosť spomína"
 % SRSLY!!?!? cela kapitola v related work, a udavame presne dvovody preco
@@ -397,10 +428,10 @@
 \begin{frame}{Opponent's review}
     \begin{block}{Notation}
         \begin{itemize}   
-            \item "označenia bez akéhokoľvek vysvetlenia":
-            \item "matica M" % pre čitateľa má byť podstatné len to, že to je matica dokumentov. Používame maticu MT, lebo je to z nejakheho dvovodu standard pre robenie SVD dekompozicie.
-            \item "documents vs sentences": "We consider the sentences to be basically identical to documents as they both
-can be considered to be sequences of words."            
+            \item ``označenia bez akéhokoľvek vysvetlenia''
+            \item ``matica M'' % pre čitateľa má byť podstatné len to, že to je matica dokumentov. Používame maticu MT, lebo je to z nejakheho dvovodu standard pre robenie SVD dekompozicie.
+            \item ``documents vs sentences'': ``We consider the sentences to be basically identical to documents as they both
+can be considered to be sequences of words.''        
              
         \end{itemize}
     \end{block}
@@ -445,7 +476,7 @@ can be considered to be sequences of words."
 \begin{frame}{Opponent's review}
     \begin{block}{Others}
         \begin{itemize}   
-            \item ``Ako sa spoja TF a IDF váhy do jednej'': product
+            \item ``Ako sa spoja TF a IDF váhy do jednej'': multiplication
             \item Classifier in 4.2.3: logistic regression % we used SVM as well, but results were poor, multiple classifiers should be changed to logistic regression
         \end{itemize}
     \end{block}
@@ -484,9 +515,20 @@ can be considered to be sequences of words."
 \begin{frame}{Supervisor's review}
     \begin{block}{Datasets \*}
         \begin{itemize}
-            %\item V práci používate 5 rôznych dátových množín, z ktorých každá predstavuje trochu iný problém. Ich porovnanie uvádzate v číslach v tabuľke 4.1, viete ich všask navzájom porovnať a vysvetliť v čom sa líšia a akým spôsobom sa tieto odlišnosti prejavia pri použití rôznych prístupov pre tvorbu slovných vektorov a váh?
-            \item \*
-        \end{itemize}
+            \item Customer review dataset (CR)
+            \item Movie review (MR)
+            \item Subjective vs objective (SUBJ)
+            \item Opinion polarity (MPQA)
+            \item Questions types (TREC)
+            \begin{itemize}
+                \item ABBR  
+                \item DESC  
+                \item ENTY  
+                \item HUM   
+                \item LOC  
+                \item NUM
+            \end{itemize}
+        \end{itemize}            
     \end{block}
 \end{frame}
 
@@ -500,14 +542,7 @@ can be considered to be sequences of words."
     \end{block}
 \end{frame}
 
-\appendix
-\subsection{Literature}                
-\begin{frame}[allowframebreaks]{Literature}
-\footnotesize
-    \nocite{*}
-    \bibliographystyle{apalike}
-    \bibliography{prezentacia.bib} 
-\end{frame}
+
 
 \begin{frame}{Count vs. prediction}
     \begin{block}{Prediction}
