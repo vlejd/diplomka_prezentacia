@@ -1,0 +1,117 @@
+1  prvy slide
+    Prihovor. Vazena komisia, ucitelsky zbor, mily kolegovia. 
+    Volam sa Vladimir Macko a temov mojej diplomovej prace bolo zlepsovanie vah metody LSA pre klasifikaciu dokumentov. Mojov skolitelkov je Kristina Malinovska
+
+2  prehlad
+    Najprv si priblizime problem klasifikacie dokumentov, nasledne ozrejmime problemy metody LSA a navrhneme ich riesenie pomocou eLSA ktore nakonic odtestujeme
+
+3  klasifikacia dokumentov
+    Pre potreby tejto prezentacie budeme volne zamienat slova veta, dokument a text.
+    Pri probleme klasifikacie dokummentov mame na vstupe dokument, alebo vetu a chceli by se ho zaradit do jednej z dopredu definovanych kategorii. 
+    Casto mame len dve kategorie a teda ide binarnu klasifikcnu ulohu. Jedov z najpopularnejsich takychto uloh je klasifikacia sentiment. Teda, ci je dana vet alebo dokument pozitivna, alebo negativna.
+    Napriklad pre vetu: "toto pol priserny film" by sme chceli povvedat, ze nesie negativny sentiment, a dany film bol pravdepodobne zly.
+
+    Pristupy k tomuto problemu vacsinou obsahuju niekolko casti. Najprv vytvoria vektorovu reprezentaciu pre slova, nasledne ju spoja do reprezentacie pre cely dokument. 
+    Nakoniec sa tato reprezentacia pouzije na natrenovanie klasifikatora. 
+
+5  LSA
+    Jednym z takychto pristupov je metoda LSA. Ta na vstupe dostane mnozinu dokumentov. Tie zakoduje do riedkeho vektora, nazyvaneho "vrece slov" (bag of words), cislo na i-tej pozici zodpoveda poctu slov i v texte. 
+    Nasledne slova prevahuje pomocou vahovej schemy, napriklad tfidf. Slovam, ktore su v texte casto, ako napriklad neplnovyznamove slova, sa vaha zmensi, zatialco vzacnejsim slovam sa zvacsi.
+    Toto wahovanie ma ale pristu len k dokumentom, a nie k informaciam o realnom sentimente. 
+    Nasledne sa na korpus prevahovanych dokumentov aplijuje redukcia dimenzie, v podobe maticovej faktorizacie. Pre LSA sa pouziva SVD dekompozicia. 
+    Takto ziskame kustu, menej rozmernu reprezentaciu dokumentov. 
+    Tuto reprezentaciu a informmaciu o skutocnej klasifikacii potom pouzijee na natrenovanie klasifikatora C (napdiklad logistickej regresie alebo SVM-ka) 
+
+
+4  SVD dekompozicia podla vlastnych hodnout
+    Pripomenme si, ako funguje SVD dekompozicia. Na vstupe dostane maticu M, kde riadky su jednotlive dokumenty a na vytup vrati Matice U, Sigma, V. 
+    Orezanim tychto matic a spravnym vynasobnim potom vieme zratat diU, co je menej rozmerna reprezentacia dokumentu i.
+
+6  problemy
+    LSA ma niekolko problemov, ktorych pricinou je SVD dekompozicia. Tym ze ju orezeme, bezpodmienecne stratime nejaku informaciu o povodnom texte (povodnej matici). Kedze toto SVD nema informaciu o ziadnom cleneni dokumentov, zachova informacie ktore su najreprezentativnejsie a nie najdiskriminativnejsie. Moze teda zachovat vela informacie o prilis castych sloach, ktore ale nemusia mat vobec ziadnu pridanu hodnotu pre nasu klasifikacnu ulohu (ako napriklad cleny). Preto je velmi zavysla na predspracovani textu a spravnom zlvoleni vahovej schemy.
+
+7  momentalne riesenia problemov
+    V sucatsnosti sa tieto problemy riesia pozornym predspracovanim, zohladnenim skutocnej klasifikacie vo vahovej scheme, alebo pri maticovej dekompozicii. 
+
+8  momentalne riesenia obrazok
+    Mozme si to vyzualizovat takto. Vahova schema ako napriklad tfchi2 potom zohladni nie len pocet vyskytov slov, ale aj to, o kolko viac sa slovo vyskytuje v jednej kategorii dokumentov ako v druhej.
+    tieto pristupy ale stale nedokazu nejako interagovat s klasifikatorom, a nedokazu sa "ucit z chyb" klasifikatora.
+
+9  eLSA
+    Preto sme navrhli metodu eLSA, error bossted LSA. Ta dostane na vstupe dokumenty, vyrobi z nich vrecia slov a tie prevahuje nehajov vahovov schemov. Nasledne ale kazde slovo vynasoby vahov w'. 
+    Pre takto prevahovane slova potom zrata SVD dekompoziciu a natrenuje klasfikator. 
+    Nasledne ale chybu klasifikatora pouzije na zlepsenie vah w' a cely proces zopakuje.
+    Podotykam, ze w' je na zaciatku nastavena na same jednoty a ted slova vobec nemi. Tym padom je eLSA v prvom kroku rovnaka ako LSA.
+
+10 gradient: ako to ucit?
+    Ako ale dokazeme zlepsovat w'? Dvolezitim pozorovanim je, ze ak sme uz zratali SVD, tak zratanie reprezentacie dokumentu je len maticove nasobenie. Kedze pouzivame diferencovatelny klasifikator (ligisticku regresiu), dokazeme zratat parcialnu derivaciu chyby podla nasich parametrov w'. 
+    Nasledne vieme pouzit metodu najvacsieho vsozstupu a postupne vylepsovat w' az do konvergencie. 
+
+11 Vyhodnotenie
+    eLSu sme testovali na niekolkych standardnych pristupnych pomocou kniznice SentEval. Ide o styri v principe sentimentove datasety. Jeden je na recenzie produktov, jeden na filmy, jeden na objetivnost respektive subjektivnost nazorov a jeden na silu polarity nazoru. Posledny dataset TREC je na klasifikaciu otazok do niekolkych kategorii,  podla toho aka ma byt odpoved. Ci ma byt odpoved nejaka skratka, alebo nejake cislo, alebo nejaky opis.
+    Kazdy z tychto datasetov sme rozdelili na trenovaciu, validacnu, a testovaciu mnozinu. 
+
+12 Uciace krivky: Najprv sme trenovali na trenovacej kym na validacnej stupala presnost, potom sme odtestovali na testovacej.
+    Najdvolezitejsou otazkov o eLSE je, ci to vobec funguje.  Kryvky ucenia. nas presvecia ze ano, a vieme ziskat minimalne niekolko percent presnosti klasifikacie.
+
+13 eLSA vysledky
+14 eLSA vysledky
+15 vzhlad do dat -> dvolezite na tejto metode ze mozme pozerat na w'. stop words,
+16 insight 2
+17 ine experimenty: sinkni vsetok cas (word vectors, learning rates, batch gradient descent. stochastick gradient descent, dalsie datasety)
+18 literatura
+
+
+.... dakujem za pozornost
+
+
+
+posudky: oponent
+    notacia bez vysvetlenia -> 
+    menenie notacie MT a M  ->  literatura
+    document vs sentence    ->  vieme a vedeli sme o tom. citatela na to dokonca upozornime. Oped problem v literature. 
+                                Nase datasety su len vety, ale malo by to byt priamo aplikovatelne aj na dokumenty. text
+
+
+    citacie ->  praca obsahuje 62 citacii na 6 stranach. 
+    inspirovali sme sa hlavne stylom inych uspesnych duplomovych prac (Maria Vajdova), A, A
+    co sa tyka SGD -> naozaj ho necitujeme, namiesto toho citujeme "ucebnicu" dep learningbook, jeden z "relativne" nedavnych clankov a clanok o uceni pomocou spatneho sirenia chyb.
+    co sa tyke TFIDF -> citacia v diplomovej praci samozrejme je, je ale mozne ze nie je explicitne na vsetkych miestach kde sa TFIDF v praci spomina.
+    co sa tyka presneho zadefinovania wahovych schem, uznavame, ze pre uplnost by bolo potrebne ich explicitne uviest. V danej sekcii sa ale nachadza zoznam literaturi, v ktorej si to citatel moze presne pozriet. Problem je, ze tieto vahy vyzeraju priblizne takto: a mali sme pocit, ze by citatelovi nepriniesli prilis vela pochopenia o tom, ako funguju.
+
+    Taktiez v praci pouzivame "defaultne parametre" pre niektore modely a explicitne ich neuvadzame. Pokial by mal ale citatel zaujem, v kode sa nachdza presna verzia vsetkych kniznic ktore pouzivame a teda dostat sa k tymto parametrom nie je problem. Uznavame ale, ze z tychto parametrov sme mali urcite spomenut minimalne 2 a to penalty (regularizacia) a kernel (typ kernelu v svm). Nasim cielom ale nebolo optimalizovot hyperparametre a zaujimal nas skvor kvalitativny ako kvantitativny vysledok (v praci niekolko krat spominame).
+
+    V praci naozaj neuvadzame ako sa tf a idf kombinuje do vyslednej vahy. Ide o sucin.
+    V casti 4.2.3 sme nemali pouzit formulatiu "we test multiple classifiers", ale len "we test logistic regression". V skutocnosti mame vysledky aj ine klasifikatori, ale z rozsahovych pricin sme sa rozhodli ich nezaradit.
+
+    OTAZKY
+        -> co sa tyka nejakych obmedzeni na parametre w', naozaj sme ziadne nedavali. pridat ich by bolo na prvy pohlad lahke, ale vyriesit vsetky technicke detajli moze byt velmi problematike (odporucam pozriet niekolko clankov o wserstein ganoch)
+        -> v tom pripade by teoreticky naozaj nemal byt rozdiel ak W vynasobime 2 a tato vaha by sa mala vstrebat do parametrov klasifikatora. V praxi to ale nieje pravda, lebo klasifikator moze (a aj je) regularizovany 
+        -> v praxi je vacsina vah koncentrovana okolo 1. 
+
+        v praci uvadzame velmi naznak toho, ze vahy mensie ako 1 sa daju charakterizovat ako podvazenie. hodnotov vo W' sa vynasoby povodna vaha slova! Takze naozaj ak je to menej, tak sa zmensi (povodna vaha bola privysoka) ak viac, tak povodna bola primala.
+
+        Naozaj by sme sa vedeli pozriet aj na ine miery "podstatnosti". Toto ale opat otvara celu novu oblast sucastneho vyskumu. 
+
+        Rad by som sa Obytal ci toto bola upojiva odpoved, a ci je teda jej hodnotenie B. 
+
+posudky: skolitel
+
+    
+    zlozitost eLSA:
+        Je lahke ju porovnat so zlozitostov LSA. A to je ze mi zbehneme cele LSA, akurad to spravime niekolko krat. cena spojena s ratanim derivacie prida maximalne konstantny faktor.
+
+    zlozitost LSA: 
+        trochu problematicke ju exaktne vyjadrit. implementacia ktoru sme pouzili je zalozena na na aproximacnych metodach. a je mplementovana podla matematickeho clanku, ktory neobsahoval casovu zlozitost (alebo som si ju nevsimol), je ale mozne, ze je to velmi blizko zlozitosti algoritmu word2vec
+        Cas word2vecu 
+
+
+
+
+TODO: 
+    preloz SVD singularny rozklad
+kuk incremental SVD
+    Fix kikino meno.
+
+    Zmen LSA a SVD
+    derivacia poklada SVD za konstantu
