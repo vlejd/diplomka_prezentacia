@@ -53,7 +53,7 @@
 \title[eLSA]{Improving LSA word weights for document classification}
 
 \author[Macko, Malinovska] % (optional, for multiple authors)
-{Bc. Vladimír Macko\inst{1} \and supervisor: RNDr. Kristína Malinovská, PhD.\inst{1}}
+{Bc. Vladimír Macko\inst{1} \\ \and supervisor: RNDr. Kristína Malinovská, PhD.\inst{1}}
  
 \institute[VFU] % (optional)
 {
@@ -97,6 +97,18 @@
     \end{block}
 \end{frame} 
 
+\begin{frame}{LSA}
+    \includegraphics[width=0.9\textwidth]{LSA.pdf}
+    \begin{block}
+        
+        $W$: reweighting
+
+        $S$: decomposition
+        
+        $C$: classifier
+    \end{block}
+\end{frame}
+
 \begin{frame}{SVD}
 ~
     {\tiny \input{lsa.tex}}
@@ -111,18 +123,6 @@
         $v_i$: document vector
         
         $d_i U$: lower dimensional embedding
-    \end{block}
-\end{frame}
-
-\begin{frame}{LSA}
-    \includegraphics[width=0.9\textwidth]{LSA.pdf}
-    \begin{block}
-        
-        $W$: reweighting
-
-        $S$: decomposition
-        
-        $C$: classifier
     \end{block}
 \end{frame}
 
@@ -227,7 +227,7 @@
 \end{frame} 
 
 \begin{frame}{eLSA results}
-    \smalll
+    \small
 \begin{table}[H]
 \begin{center}
 
@@ -255,7 +255,7 @@ tfgr & 200 & \textbf{0.01} &     -0.0 & \textbf{0.01} & \textbf{0.02} \\
 \end{frame}
 
 \begin{frame}{eLSA results}
-    \smalll
+    \small
 \begin{table}[H]
 \begin{center}
 
@@ -430,7 +430,9 @@ words &  $w'$ \\
         \begin{itemize}   
             \item ``označenia bez akéhokoľvek vysvetlenia''
             \item ``matica M'' % pre čitateľa má byť podstatné len to, že to je matica dokumentov. Používame maticu MT, lebo je to z nejakheho dvovodu standard pre robenie SVD dekompozicie.
-            \item ``documents vs sentences'': ``We consider the sentences to be basically identical to documents as they both
+            \item ``SVD ako konštanta''
+
+            \item ``documenty alebo vety'': ``We consider the sentences to be basically identical to documents as they both
 can be considered to be sequences of words.''        
              
         \end{itemize}
